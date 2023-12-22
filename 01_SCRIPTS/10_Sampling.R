@@ -1,5 +1,6 @@
 # load in package to plot
 library(ggplot2)
+vaccine_colours <- c("#d9b3ff", "#c2c2a3", "#009999")
 
 # set a working directory 
 setwd("~/Desktop/COVID-19_Vaccination_GM")
@@ -16,7 +17,7 @@ timepoint_order <- colnames(df[,3:11])
 
 # loop through the read in excel file dataframe (df) to create a new long dataframe (df2) detailing only the timepoints in which each patient sampled
 for (i in 1:length(rownames(df))){
-  for (j in 4:length(colnames(df))){
+  for (j in 3:length(colnames(df))){
     if (df[i,j] == 1){
       df2 <- rbind(df2,
                    data.frame(PatientID = df[i,2], Cohort = df[i,1], Timepoint = colnames(df)[j], Value = 1))
@@ -27,13 +28,26 @@ for (i in 1:length(rownames(df))){
 # set the patient order as a factor for graphing
 df2$PatientID <- factor(df2$PatientID, levels = rev(col_order))
 
-# plot 
-sampling <- ggplot(df2, aes(Timepoint, 
+# create new df to define background vaccine colours for plot
+df_for_bg <- data.frame(ID = c(1,2,3), Xmin = c(0.5, 3.5, 6.5), Xmax = c(3.5, 6.5, 9.5))
+
+sampling <- ggplot() + 
+  geom_line(data = df2, aes(Timepoint, 
                             PatientID, 
                             group = PatientID, 
                             colour = Cohort)) + 
-              geom_line() + geom_point(size = 4) + 
-              scale_x_discrete(limits = timepoint_order) 
+  geom_rect(data = df_for_bg, 
+            aes(xmin = Xmin, xmax = Xmax,
+                ymin = -Inf, ymax = Inf, 
+                fill = as.factor(ID)), alpha = 0.5) + scale_fill_manual(values = vaccine_colours) + labs(fill = "Vaccine") +
+  geom_point(data = df2, aes(Timepoint, 
+                             PatientID, 
+                             group = PatientID, 
+                             colour = Cohort), size = 4) + 
+            scale_x_discrete(limits = timepoint_order,
+                             guide = guide_axis(n.dodge = 2))
+
 
 # results in a abacus plot detailing each sample from each participant in the study, colours depict cohorts.
-ggsave("03_FIGURES/Sampling.pdf", sampling)
+ggsave("03_FIGURES/Supp_Fig1.pdf", sampling)
+

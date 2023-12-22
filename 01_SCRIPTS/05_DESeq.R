@@ -2,7 +2,7 @@
 setwd("~/Desktop/COVID-19_Vaccination_GM")
 
 # source R settings
-source("01_SCRIPTS/Settings.R")
+source("01_SCRIPTS/00_Settings.R")
 
 # read pre-processed files back in
 meta_new <- readRDS("02_RESULTS/Modified_metadata.rds")
@@ -44,6 +44,7 @@ taxa_sig = rownames(res[1:35, ])
 
 # see what species are significantly different between the two timepoints
 taxa_sig_check = res[(res$padj < alpha), ]
+taxa_sig_check
 
 # acquire data for the heatmap
 ps.taxa.rel <- transform_sample_counts(ps_subset_DESeq_test, function(x) x/sum(x)*100)
@@ -83,24 +84,20 @@ phylum_colors <- setNames(color_palette, phylum_names)
 ann_colors = list(`Timepoint` = c("Pre-Dose" = "#E69F00", "Acute" = "#CC79A7"),
                   Phylum = phylum_colors)
 
-Fig2A <- pheatmap(log(otu_matrix+1e-05), scale= "none", 
+Fig2A <- pheatmap(log(otu_matrix+1e-05), scale= "row", 
                          annotation_col = annotation_col, 
                          annotation_row = annotation_row, 
                          annotation_colors = ann_colors,
                          cluster_rows = F,
                          cluster_cols = T,
-                         show_colnames = F,
+                         show_colnames = T,
                          fontsize = 7,
-                         heatmap_legend_param = list(title = "log2 Fold Change"))
+                         heatmap_legend_param = list(title = "log(Relative Abundance"))
 
 # pheatmap functions to save a pdf
 pdf("03_FIGURES/Figure2A.pdf",  width = 8, height = 6)
 print(Fig2A)
 dev.off() 
-
-# save otu_table used for DESeq
-# saveRDS(otu_table, "00_DATA/Fig2A_data.rds")
-
 
 # plot fold change on the significantly different species 
 plot_sig = cbind(as(taxa_sig_check, "data.frame"), as(tax_table(ps_subset_DESeq_test)[rownames(taxa_sig_check), ], "matrix"))
@@ -121,9 +118,6 @@ Fig2B <- ggplot(plot_sig,
              legend.title = element_text(size=16))
 
 ggsave("03_FIGURES/Figure2B.pdf", Fig2B)
-
-# save otu_table used for DESeq
-# saveRDS(plot_sig, "00_DATA/Fig2B_data.rds")
 
 
 # DESeq analysis - Supp_Figures 2A + 2C = HC cohort
@@ -193,7 +187,7 @@ phylum_colors <- setNames(color_palette, phylum_names)
 ann_colors = list(`Timepoint` = c("Pre-Dose" = "#E69F00", "Acute" = "#CC79A7"),
                   Phylum = phylum_colors)
 
-Supp_Fig2A <-  pheatmap(log(otu_matrix+1e-05), scale= "none", 
+Supp_Fig2A <-  pheatmap(log(otu_matrix+1e-05), scale= "row", 
                   annotation_col = annotation_col, 
                   annotation_row = annotation_row, 
                   annotation_colors = ann_colors,
@@ -201,15 +195,13 @@ Supp_Fig2A <-  pheatmap(log(otu_matrix+1e-05), scale= "none",
                   cluster_cols = T,
                   show_colnames = F,
                   fontsize = 7,
-                  heatmap_legend_param = list(title = "log2 Fold Change"))
+                  heatmap_legend_param = list(title = "log(Relative Abundance)"))
 
 # pheatmap functions to save a pdf
 pdf("03_FIGURES/Supp_Fig2A.pdf",  width = 8, height = 6)
 print(Supp_Fig2A)
 dev.off() 
 
-# save otu_table used for DESeq
-# saveRDS(otu_table, "00_DATA/Supp_Fig2A_data.rds")
 
 # plot fold change on the significantly different species 
 plot_sig = cbind(as(taxa_sig_check, "data.frame"), as(tax_table(ps_subset_DESeq_test)[rownames(taxa_sig_check), ], "matrix"))
@@ -230,9 +222,6 @@ Supp_Fig2C <-  ggplot(plot_sig,
         legend.title = element_text(size=16))
 
 ggsave("03_FIGURES/Supp_Fig2C.pdf", Supp_Fig2C)
-
-# save otu_table used for DESeq
-# saveRDS(plot_sig, "00_DATA/Supp_Fig2C_data.rds")
 
 
 # DESeq analysis - Supp_Figures 2B + 2D = PID cohort
@@ -302,7 +291,7 @@ phylum_colors <- setNames(color_palette, phylum_names)
 ann_colors = list(`Timepoint` = c("Pre-Dose" = "#E69F00", "Acute" = "#CC79A7"),
                   Phylum = phylum_colors)
 
-Supp_Fig2B <- pheatmap(log(otu_matrix+1e-05), scale= "none", 
+Supp_Fig2B <- pheatmap(log(otu_matrix+1e-05), scale= "row", 
                         annotation_col = annotation_col, 
                         annotation_row = annotation_row, 
                         annotation_colors = ann_colors,
@@ -310,15 +299,13 @@ Supp_Fig2B <- pheatmap(log(otu_matrix+1e-05), scale= "none",
                         cluster_cols = T,
                         show_colnames = F,
                         fontsize = 7,
-                        heatmap_legend_param = list(title = "log2 Fold Change"))
+                        heatmap_legend_param = list(title = "log(Relative Abundance)"))
 
 # pheatmap functions to save a pdf
 pdf("03_FIGURES/Supp_Fig2B.pdf",  width = 8, height = 6)
 print(Supp_Fig2B)
 dev.off() 
 
-# save otu_table used for DESeq
-# saveRDS(otu_table, "00_DATA/Supp_Fig2B_data.rds")
 
 # plot fold change on the significantly different species 
 plot_sig = cbind(as(taxa_sig_check, "data.frame"), as(tax_table(ps_subset_DESeq_test)[rownames(taxa_sig_check), ], "matrix"))
@@ -339,6 +326,3 @@ Supp_Fig2D <-  ggplot(plot_sig,
         legend.title = element_text(size=16))
 
 ggsave("03_FIGURES/Supp_Fig2D.pdf", Supp_Fig2D)
-
-# save otu_table used for DESeq
-# saveRDS(plot_sig, "00_DATA/Supp_Fig2D_data.rds")

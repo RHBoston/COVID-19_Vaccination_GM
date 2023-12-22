@@ -2,7 +2,7 @@
 setwd("~/Desktop/COVID-19_Vaccination_GM")
 
 # source R settings
-source("01_SCRIPTS/Settings.R")
+source("01_SCRIPTS/00_Settings.R")
 
 # read pre-processed files back in
 meta_new <- readRDS("02_RESULTS/Modified_metadata.rds")
@@ -89,14 +89,9 @@ p2 <- ggplot(final,
         axis.title = element_blank())
 
 aligned_plots <- align_plots(p1, p2, align="hv", axis="tblr")
-Fig2D <- ggdraw(aligned_plots[[2]]) + draw_plot(aligned_plots[[1]])
+Fig2E <- ggdraw(aligned_plots[[2]]) + draw_plot(aligned_plots[[1]])
 
-ggsave("03_FIGURES/Figure2D.pdf", Fig2D)
-
-# write out data
-Fig2D_data <- final[, c(1:7, 39)]
-saveRDS(Fig2D_data, "00_DATA/Fig2D_data.rds")
-
+ggsave("03_FIGURES/Figure2E.pdf", Fig2E)
 
 ## Abundances of species level in scatter plots
 # melt the phyloseq = pivot longer on species
@@ -104,21 +99,38 @@ ps_main_full <-psmelt(ps_main_composition)
 
 # Look at specific species 
 Fig2C <- ggplot(data = subset(ps_main_full, Cohort %in% "ICP" & Species %in% "s__Klebsiella pneumoniae"),
-             aes(x=Cohort, 
-                 y=log(Abundance),
-                 colour = TimepointF)) + 
-        geom_point(position=position_jitterdodge(jitter.width = .1), size = 4) +
-        labs(y = "log(Relative Abundance)") +
-        scale_colour_manual(values = timepoint_colours, name = "Timepoint") +
-        theme(axis.text = element_text(size=16), 
-              axis.title.x = element_blank(),
-              axis.title.y = element_text(size = 20),
-              legend.position = "bottom",
-              legend.text = element_text(size = 16),
-              legend.title = element_text(size=16),
-              strip.text.x = element_text(size = 20)) 
+                aes(x=Cohort, 
+                    y=log(Abundance),
+                    colour = TimepointF)) + 
+  geom_point(position=position_jitterdodge(jitter.width = .1), size = 4) +
+  labs(y = "log(Relative Abundance)") +
+  scale_colour_manual(values = timepoint_colours, name = "Timepoint") +
+  theme(axis.text = element_text(size=16), 
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 20),
+        legend.position = "bottom",
+        legend.text = element_text(size = 16),
+        legend.title = element_text(size=16),
+        strip.text.x = element_text(size = 20)) 
 
-Fig2E <-  ggplot(data = subset(ps_main_full, Species %in% "s__Faecalibacterium prausnitzii"), 
+# Look at specific species 
+Fig2D <- ggplot(data = subset(ps_main_full, Cohort %in% "ICP" & Species %in% "s__Butyrivibrio crossotus"),
+                aes(x=Cohort, 
+                    y=log(Abundance),
+                    colour = TimepointF)) + 
+  geom_point(position=position_jitterdodge(jitter.width = .1), size = 4) +
+  labs(y = "log(Relative Abundance)") +
+  scale_colour_manual(values = timepoint_colours, name = "Timepoint") +
+  theme(axis.text = element_text(size=16), 
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 20),
+        legend.position = "bottom",
+        legend.text = element_text(size = 16),
+        legend.title = element_text(size=16),
+        strip.text.x = element_text(size = 20)) 
+
+
+Fig2F <-  ggplot(data = subset(ps_main_full, Species %in% "s__Faecalibacterium prausnitzii"), 
                  aes(x=Cohort, 
                      y=log(Abundance),
                      colour = TimepointF)) + 
@@ -132,9 +144,12 @@ Fig2E <-  ggplot(data = subset(ps_main_full, Species %in% "s__Faecalibacterium p
         legend.position = "bottom",
         legend.text = element_text(size = 16),
         legend.title = element_text(size=16),
-        strip.text.x = element_text(size = 20)) 
+        strip.text.x = element_text(size = 20)) +
+  geom_pwc(aes(group = Timepoint), method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+           p.adjust.by = c("group"), 
+           label = "p.adj.format") 
 
-Fig2F <-  ggplot(data = subset(ps_main_full, Species %in% "s__Akkermansia muciniphila"), 
+Fig2G <-  ggplot(data = subset(ps_main_full, Species %in% "s__Akkermansia muciniphila"), 
                  aes(x=Cohort, 
                      y=log(Abundance),
                      colour = TimepointF)) + 
@@ -148,9 +163,13 @@ Fig2F <-  ggplot(data = subset(ps_main_full, Species %in% "s__Akkermansia mucini
         legend.position = "bottom",
         legend.text = element_text(size = 16),
         legend.title = element_text(size=16),
-        strip.text.x = element_text(size = 20)) 
+        strip.text.x = element_text(size = 20)) +
+  geom_pwc(aes(group = Timepoint), method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+           p.adjust.by = c("group"), 
+           label = "p.adj.format") 
+  
 
-Fig2G <-  ggplot(data = subset(ps_main_full, Species %in% "s__Escherichia coli"), 
+Fig2H <-  ggplot(data = subset(ps_main_full, Species %in% "s__Escherichia coli"), 
                  aes(x=Cohort, 
                      y=log(Abundance),
                      colour = TimepointF)) + 
@@ -164,28 +183,19 @@ Fig2G <-  ggplot(data = subset(ps_main_full, Species %in% "s__Escherichia coli")
         legend.position = "bottom",
         legend.text = element_text(size = 16),
         legend.title = element_text(size=16),
-        strip.text.x = element_text(size = 20)) 
+        strip.text.x = element_text(size = 20)) +
+  geom_pwc(aes(group = Timepoint), method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+           p.adjust.by = c("group"), 
+           label = "p.adj.format") 
+
 
 # save figures
 ggsave("03_FIGURES/Figure2C.pdf", Fig2C)
+ggsave("03_FIGURES/Figure2D.pdf", Fig2D)
 ggsave("03_FIGURES/Figure2E.pdf", Fig2E)
 ggsave("03_FIGURES/Figure2F.pdf", Fig2F)
 ggsave("03_FIGURES/Figure2G.pdf", Fig2G)
-
-# save data
-#tmp1 <- subset(ps_main_full, Cohort %in% "ICP" & Species %in% "s__Klebsiella pneumoniae")
-#tmp2 <- subset(ps_main_full, Species %in% "s__Faecalibacterium prausnitzii")
-#tmp3 <- subset(ps_main_full, Species %in% "s__Akkermansia muciniphila")
-#tmp4 <- subset(ps_main_full, Species %in% "s__Escherichia coli")
-
-#Fig2C_data <- tmp1[, c(1:7, 45)]
-#Fig2E_data <- tmp2[, c(1:7, 45)]
-#Fig2F_data <- tmp3[, c(1:7, 45)]
-#Fig2G_data <- tmp4[, c(1:7, 45)]
-
-#saveRDS(Fig2C_data, "00_DATA/Fig2C_data.rds")
-#saveRDS(Fig2E_data, "00_DATA/Fig2E_data.rds")
-#saveRDS(Fig2F_data, "00_DATA/Fig2F_data.rds")
+ggsave("03_FIGURES/Figure2H.pdf", Fig2H)
 
 
 # statistics 
@@ -230,6 +240,7 @@ for (species in spec_list) {
   }
 }
 
-p_values_spec$FDR <- p.adjust(p_values_spec$p_value, method = "fdr") 
+p_values_spec$padj <- p.adjust(p_values_spec$p_value, method = "bonferroni") 
+
 saveRDS(p_values_spec, "02_RESULTS/p_values_species.rds")
 

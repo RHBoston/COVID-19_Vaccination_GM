@@ -2,7 +2,7 @@
 setwd("~/Desktop/COVID-19_Vaccination_GM")
 
 # source R settings
-source("01_SCRIPTS/Settings.R")
+source("01_SCRIPTS/00_Settings.R")
 
 # read in data from hpc
 merged <- read.delim("00_DATA/merged_final.txt")
@@ -96,3 +96,5 @@ saveRDS(new_Metadata, "02_RESULTS/Modified_metadata.rds")
 saveRDS(Otu_table, "02_RESULTS/Modified_otu_table.rds")
 saveRDS(Tax_table_new, "02_RESULTS/Modified_tax_table.rds")
 saveRDS(ps, "02_RESULTS/Phyloseq.rds")
+
+

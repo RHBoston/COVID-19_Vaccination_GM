@@ -17,6 +17,7 @@ library("ComplexHeatmap")
 library("cowplot") 
 library("ggh4x") 
 library("rstatix") 
+library("EnhancedVolcano")
 
 # define a colour palette
 palette_OkabeIto <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",

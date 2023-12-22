@@ -2,9 +2,8 @@
 setwd("~/Desktop/COVID-19_Vaccination_GM")
 
 # source R settings
-source("01_SCRIPTS/Settings.R")
+source("01_SCRIPTS/00_Settings.R")
 
-# read pre-processed files back in - contains alpha diversity measures 
 meta_new <- readRDS("02_RESULTS/Modified_metadata.rds")
 
 ## Functional analysis
@@ -46,11 +45,12 @@ Fig4A <-  ggplot(functional_maingroups_meta_long,
                 legend.position = "bottom",
                 legend.text = element_text(size = 16),
                 legend.title = element_text(size=16),
-                strip.text.x = element_text(size = 14)) #+
-        #  geom_pwc(aes(group = Cohort),method = "wilcox_test", p.adjust.method = "fdr", tip.length = 0)
+                strip.text.x = element_text(size = 14)) +
+          geom_pwc(aes(group = Timepoint),method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+                   label = "{p.adj.format}")
         #  adds space for p-val, padj wrong, adjust accordingly
 
-Supp_Fig4A <-  ggplot(functional_maingroups_meta_long,
+Supp_Fig5A <-  ggplot(functional_maingroups_meta_long,
                  aes(x = Cohort, 
                      y = Functional_Abundance,
                      colour = Cohort)) +
@@ -65,59 +65,14 @@ Supp_Fig4A <-  ggplot(functional_maingroups_meta_long,
         legend.position = "bottom",
         legend.text = element_text(size = 16),
         legend.title = element_text(size=16),
-        strip.text.x = element_text(size = 14)) #+
-#  geom_pwc(aes(group = Cohort),method = "wilcox_test", p.adjust.method = "fdr", tip.length = 0)
+        strip.text.x = element_text(size = 14)) +
+  geom_pwc(aes(group = Cohort),method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+           label = "{p.adj.format}")
 #  adds space for p-val, padj wrong, adjust accordingly
 
 # save pdfs
 ggsave("03_FIGURES/Figure4A.pdf", Fig4A)
-ggsave("03_FIGURES/Supp_Fig4A.pdf", Supp_Fig4A)
-
-
-# statistics 
-mainfunc_stats_sub <- functional_maingroups_meta_long
-p_values_mainfunc <- data.frame(Main_Func = character(),
-                            Cohort = character(),
-                            Timepoint1 = character(),
-                            Timepoint2 = character(),
-                            p_value = numeric())
-
-# Get unique cohorts, timepoints and species
-cohorts <- unique(mainfunc_stats_sub$Cohort)
-timepoints <- unique(mainfunc_stats_sub$Timepoint)
-mainfunc_list <- unique(mainfunc_stats_sub$Functional_Main)
-
-# Loop through each species, cohort, and unique timepoint combinations within each cohort
-for (func in mainfunc_list) {
-  for (cohort in cohorts) {
-    unique_timepoints <- unique(mainfunc_stats_sub$Timepoint[mainfunc_stats_sub$Cohort == cohort])
-    for (i in 1:(length(unique_timepoints) - 1)) {
-      for (j in (i + 1):length(unique_timepoints)) {
-        timepoint1 <- unique_timepoints[i]
-        timepoint2 <- unique_timepoints[j]
-        
-        # Create subsets for the two timepoints within the same cohort
-        group1 <- subset(mainfunc_stats_sub, Functional_Main == func & Cohort == cohort & Timepoint == timepoint1)
-        group2 <- subset(mainfunc_stats_sub, Functional_Main == func & Cohort == cohort & Timepoint == timepoint2)
-        
-        # Perform Wilcoxon signed-rank test
-        p_value <- wilcox.test(group1$Functional_Abundance, group2$Functional_Abundance)$p.value
-        
-        # Store the results in the data frame
-        result <- data.frame(Main_Func = func,
-                             Cohort = cohort,
-                             Timepoint1 = timepoint1,
-                             Timepoint2 = timepoint2,
-                             p_value = p_value)
-        
-        p_values_mainfunc <- rbind(p_values_mainfunc, result)
-      }
-    }
-  }
-}
-
-p_values_mainfunc$FDR <- p.adjust(p_values_mainfunc$p_value, method = "fdr") 
-saveRDS(p_values_mainfunc, "02_RESULTS/p_values_main-func.rds")
+ggsave("03_FIGURES/Supp_Fig5A.pdf", Supp_Fig5A)
 
 
 # read in the data analysis of the next level of functional grouping + manipulate for graphing
@@ -149,7 +104,7 @@ Fig4B <- ggplot(ENOG_meta_long,
             labs(x = "Sample", y="Relative Abundance") + 
             theme(axis.text.x = element_blank(),
                   axis.ticks.x=element_blank(),
-                  legend.position = "bottom")
+                  legend.position = "bottom") 
 
 ggsave("03_FIGURES/Figure4B.pdf", Fig4B, width = 75, height = 24, units = "cm")
 
@@ -170,7 +125,10 @@ Fig4C <- ggplot(subset(ENOG_meta_long, Functional_Group %in% c("[M] Cell wall/me
                   legend.position = "bottom",
                   legend.text = element_text(size = 16),
                   legend.title = element_text(size=16),
-                  strip.text.x = element_text(size = 14)) 
+                  strip.text.x = element_text(size = 14)) + 
+  geom_pwc(aes(group = Timepoint),method = "wilcox_test", p.adjust.method = "bonferroni", tip.length = 0,
+           label = "{p.adj.format}")
+  
 
 # save it
 ggsave("03_FIGURES/Figure4C.pdf", Fig4C)
@@ -182,7 +140,7 @@ design <- "DKLOPQRS
            ABIJ####"
 
 # remaining functional groups (n=19) 
-Supp_Fig4B <- ggplot(subset(ENOG_meta_long, !Functional_Group %in% c("[M] Cell wall/membrane/envelope biogenesis","[E] Amino acid transport and metabolism", "[L] Replication, recombination and repair")),
+Supp_Fig5B <- ggplot(subset(ENOG_meta_long, !Functional_Group %in% c("[M] Cell wall/membrane/envelope biogenesis","[E] Amino acid transport and metabolism", "[L] Replication, recombination and repair")),
                            aes(x = Cohort, 
                                y = Functional_Abundance,
                                colour = TimepointF)) +
@@ -195,7 +153,7 @@ Supp_Fig4B <- ggplot(subset(ENOG_meta_long, !Functional_Group %in% c("[M] Cell w
                       axis.title.x = element_blank(),
                       legend.position = "bottom")
 # save it
-ggsave("03_FIGURES/Supp_Fig4B.pdf", Supp_Fig4B)
+ggsave("03_FIGURES/Supp_Fig5B.pdf", Supp_Fig5B)
 
 # statistics 
 func_stats_sub <- ENOG_meta_long
@@ -269,7 +227,7 @@ p_values_COG <- data.frame(COG = character(),
                             Cohort = character(),
                             Timepoint1 = character(),
                             Timepoint2 = character(),
-                            p_value = numeric())
+                            P_Value = numeric())
 
 # Get unique cohorts, timepoints and species
 cohorts <- unique(COG_stats_sub$Cohort)
@@ -290,14 +248,14 @@ for (cog in cog_list) {
         group2 <- subset(COG_stats_sub, Functions == cog & Cohort == cohort & Timepoint == timepoint2)
         
         # Perform Wilcoxon signed-rank test
-        p_value <- wilcox.test(group1$Functional_Abundance, group2$Functional_Abundance)$p.value
+        p_value <- wilcox.test(group1$Functional_Abundance, group2$Functional_Abundance, exact = F)$p.value
         
         # Store the results in the data frame
-        result <- data.frame(Species = cog,
+        result <- data.frame(COG = cog,
                              Cohort = cohort,
                              Timepoint1 = timepoint1,
                              Timepoint2 = timepoint2,
-                             p_value = p_value)
+                             P_Value = p_value)
         
         p_values_COG <- rbind(p_values_COG, result)
       }
@@ -305,6 +263,9 @@ for (cog in cog_list) {
   }
 }
 
-p_values_COG$FDR <- p.adjust(p_values_COG$p_value, method = "fdr") 
+colnames(p_values_COG) <- c("Statistic", "Cohort", "Group_1", "Group_2", "P_value")
 
-saveRDS(p_values_spec, "02_RESULTS/p_values_species.rds")
+cog_stats <- p_values_COG %>% group_by(Cohort) %>% mutate(padj = p.adjust(P_value, method = "bonferroni"))
+
+
+saveRDS(cog_stats, "02_RESULTS/p_values_cogs.rds")
